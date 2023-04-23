@@ -106,6 +106,13 @@ function PlayState:update(dt)
     end
 
     if self.canInput then
+		local mouseX, mouseY = love.mouse.getPosition()
+		mouseX, mouseY = push:toGame(mouseX, mouseY)
+		if mouseX and mouseY then
+			self.boardHighlightX = math.max(0, math.min(7, math.floor((mouseX - self.board.x) / 32)))
+			self.boardHighlightY = math.max(0, math.min(7, math.floor((mouseY - self.board.y) / 32)))
+		end
+
         -- move cursor around based on bounds of grid, playing sounds
         if love.keyboard.wasPressed('up') then
             self.boardHighlightY = math.max(0, self.boardHighlightY - 1)
@@ -122,7 +129,7 @@ function PlayState:update(dt)
         end
 
         -- if we've pressed enter, to select or deselect a tile...
-        if love.keyboard.wasPressed('enter') or love.keyboard.wasPressed('return') then
+        if love.keyboard.wasPressed('enter') or love.keyboard.wasPressed('return') or love.keyboard.wasPressed('mouse1') then
             
             -- if same tile as currently highlighted, deselect
             local x = self.boardHighlightX + 1

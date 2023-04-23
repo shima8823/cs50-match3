@@ -98,6 +98,12 @@ function love.keyboard.wasPressed(key)
     end
 end
 
+function love.mousepressed(x, y, button, istouch, presses)
+    if button == 1 then
+        love.keyboard.keysPressed['mouse1'] = true
+    end
+end
+
 function love.update(dt)
     
     -- scroll background, used across all states
