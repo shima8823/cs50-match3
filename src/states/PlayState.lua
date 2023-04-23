@@ -155,21 +155,37 @@ function PlayState:update(dt)
                 newTile.gridY = tempY
 
                 -- swap tiles in the tiles table
+                local tempTileHighlighted = self.board.tiles[self.highlightedTile.gridY][self.highlightedTile.gridX] -- 右
+                local tempTile = self.board.tiles[newTile.gridY][newTile.gridX] -- 左
+
                 self.board.tiles[self.highlightedTile.gridY][self.highlightedTile.gridX] =
                     self.highlightedTile
 
                 self.board.tiles[newTile.gridY][newTile.gridX] = newTile
 
-                -- tween coordinates between the two so they swap
-                Timer.tween(0.1, {
-                    [self.highlightedTile] = {x = newTile.x, y = newTile.y},
-                    [newTile] = {x = self.highlightedTile.x, y = self.highlightedTile.y}
-                })
+                if not self.board:calculateMatches() then
+                    self.board.tiles[newTile.gridY][newTile.gridX] = tempTile
+                    self.board.tiles[self.highlightedTile.gridY][self.highlightedTile.gridX] = tempTileHighlighted
+                    newTile.gridY = self.highlightedTile.gridY
+                    newTile.gridX = self.highlightedTile.gridX
+                    self.highlightedTile.gridY = tempY
+                    self.highlightedTile.gridX = tempX
                 
-                -- once the swap is finished, we can tween falling blocks as needed
-                :finish(function()
-                    self:calculateMatches()
-                end)
+                    gSounds['error']:play()
+                    self.highlightedTile = nil
+                else
+                    -- tween coordinates between the two so they swap
+                    Timer.tween(0.1, {
+                        [self.highlightedTile] = {x = newTile.x, y = newTile.y},
+                        [newTile] = {x = self.highlightedTile.x, y = self.highlightedTile.y}
+                    })
+                    
+                    -- once the swap is finished, we can tween falling blocks as needed
+                    :finish(function()
+                        self:calculateMatches()
+                    end)
+
+                end
             end
         end
     end
@@ -218,6 +234,19 @@ function PlayState:calculateMatches()
     
     -- if no matches, we can continue playing
     else
+        -- もしブロックを1回動かしてもマッチしなかったら、透明度を1から0にして、新しいブロックを生成する
+        if not self.board:isMatchable() then
+            print("not matchable")
+            Timer.tween(0.5, {
+                [self.board] = {opacity = 0}
+            }):finish(function()
+                self.board:initializeTiles()
+                Timer.tween(0.5, {
+                    [self.board] = {opacity = 1}
+                })
+            end)
+
+        end
         self.canInput = true
     end
 end
