@@ -17,6 +17,7 @@ function Board:init(x, y, level)
     self.x = x
     self.y = y
     self.level = level
+    self.opacity = 1
     self.matches = {}
 
     self:initializeTiles()
@@ -40,10 +41,7 @@ function Board:initializeTiles()
         end
     end
 
-    while self:calculateMatches() do
-        
-        -- recursively initialize if matches were returned so we always have
-        -- a matchless board on start
+    if self:calculateMatches() or not self:isMatchable() then
         self:initializeTiles()
     end
 end
@@ -66,7 +64,7 @@ function Board:calculateMatches()
 
         matchNum = 1
         if self.tiles[y][1].shiny then
-            shinyNum = shinyNum + 1
+            shinyNum = 1
         else
             shinyNum = 0
         end
@@ -108,7 +106,7 @@ function Board:calculateMatches()
                 end
 
                 if self.tiles[y][x].shiny then
-                    shinyNum = shinyNum + 1
+                    shinyNum = 1
                 else
                     shinyNum = 0
                 end
@@ -148,7 +146,7 @@ function Board:calculateMatches()
 
         matchNum = 1
         if self.tiles[1][x].shiny then
-            shinyNum = shinyNum + 1
+            shinyNum = 1
         else
             shinyNum = 0
         end
@@ -180,7 +178,7 @@ function Board:calculateMatches()
                 end
 
                 if self.tiles[y][x].shiny then
-                    shinyNum = shinyNum + 1
+                    shinyNum = 1
                 else
                     shinyNum = 0
                 end
@@ -320,10 +318,87 @@ function Board:getFallingTiles()
     return tweens
 end
 
+function Board:isMatchable()
+    local matches = {}
+
+    local matchNum = 1
+
+    -- horizontal matches first
+    for y = 1, 8 do
+        local colorToMatch = self.tiles[y][1].color
+
+        matchNum = 1
+        
+        -- every horizontal tile
+        for x = 2, 8 do
+            
+            if self.tiles[y][x].color == colorToMatch then
+              
+                matchNum = matchNum + 1
+            else
+                if matchNum >= 2 then
+                    -- 上、下、右のうちどれか一つが同じ色かどうか
+                    if (self.tiles[y - 1] and self.tiles[y - 1][x].color == colorToMatch) -- 上
+                        or (self.tiles[y + 1] and self.tiles[y + 1][x].color == colorToMatch) -- 下
+                        or (self.tiles[y][x + 1] and self.tiles[y][x + 1].color == colorToMatch) -- 右
+                    then
+                        print("horizontal " .. "x:" .. x .. ", y:" .. y)
+                        print((self.tiles[y - 1] and self.tiles[y - 1][x].color == colorToMatch))
+                        print((self.tiles[y + 1] and self.tiles[y + 1][x].color == colorToMatch))
+                        print((self.tiles[y][x + 1] and self.tiles[y][x + 1].color == colorToMatch))
+                        return true
+                    end
+                end
+                colorToMatch = self.tiles[y][x].color
+                matchNum = 1
+
+                if x >= 7 then
+                    break
+                end
+            end
+        end
+    end
+
+    -- vertical matches
+    for x = 1, 8 do
+        local colorToMatch = self.tiles[1][x].color
+
+        matchNum = 1
+
+        -- every vertical tile
+        for y = 2, 8 do
+            if self.tiles[y][x].color == colorToMatch then
+                matchNum = matchNum + 1
+            else
+                if matchNum >= 2 then
+                    -- 左、下、右のうちどれか一つが同じ色かどうか
+                    if (self.tiles[y][x - 1] and self.tiles[y][x - 1].color == colorToMatch) -- 左
+                        or (self.tiles[y + 1] and self.tiles[y + 1][x].color == colorToMatch) -- 下
+                        or (self.tiles[y][x + 1] and self.tiles[y][x + 1].color == colorToMatch) -- 右
+                    then
+                        print("vertical " .. "x:" .. x .. ", y:" .. y)
+                        print((self.tiles[y][x - 1] and self.tiles[y][x - 1].color == colorToMatch))
+                        print((self.tiles[y + 1] and self.tiles[y + 1][x].color == colorToMatch))
+                        print((self.tiles[y][x + 1] and self.tiles[y][x + 1].color == colorToMatch))
+                        return true
+                    end
+                end
+                colorToMatch = self.tiles[y][x].color
+                matchNum = 1
+
+                if y >= 7 then
+                    break
+                end
+            end
+        end
+    end
+    return false
+end
+
 function Board:render()
     for y = 1, #self.tiles do
         for x = 1, #self.tiles[1] do
-            self.tiles[y][x]:render(self.x, self.y)
+            self.tiles[y][x]:render(self.x, self.y, self.opacity)
         end
     end
 end
