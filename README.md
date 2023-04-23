@@ -9,4 +9,4 @@ Five functions were added to base the cs50 code.
    These should be worth more points, at your discretion.
 - [x]  Creat random shiny versions of blocks that will destroy an entire row on match, granting points for each block in the row.
 - [x]  Only allow swapping when it results in a match. If there are no matches available to perform, reset the board.
-- []  Implement matching using the mouse.
+- [x]  Implement matching using the mouse.
