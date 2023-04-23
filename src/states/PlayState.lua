@@ -109,8 +109,12 @@ function PlayState:update(dt)
 		local mouseX, mouseY = love.mouse.getPosition()
 		mouseX, mouseY = push:toGame(mouseX, mouseY)
 		if mouseX and mouseY then
-			self.boardHighlightX = math.max(0, math.min(7, math.floor((mouseX - self.board.x) / 32)))
-			self.boardHighlightY = math.max(0, math.min(7, math.floor((mouseY - self.board.y) / 32)))
+			local mouseSelectHighlightX = math.floor((mouseX - self.board.x) / 32)
+			local mouseSelectHighlightY = math.floor((mouseY - self.board.y) / 32)
+			if mouseSelectHighlightX >= 0 and mouseSelectHighlightX <= 7 and mouseSelectHighlightY >= 0 and mouseSelectHighlightY <= 7 then
+				self.boardHighlightX = mouseSelectHighlightX
+				self.boardHighlightY = mouseSelectHighlightY
+			end
 		end
 
         -- move cursor around based on bounds of grid, playing sounds
